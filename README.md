@@ -272,26 +272,26 @@ Promise 是异步编程的一种解决方案，比传统的解决方案——回
 then函数返回一个新的Promise
 1. 修改then函数返回值
    ```js
-   	class MyPromise {
-		...
-		then(onFulfilled, onRejected) {
-			return new MyPromise((reslove, reject) => {
-				...
-			})
-		}
-	}
+    class MyPromise {
+      ...
+      then(onFulfilled, onRejected) {
+        return new MyPromise((reslove, reject) => {
+          ...
+        })
+      }
+    }
    ```
 2. 修改callback信息
     ```js
-   	class MyPromise {
-		...
-		then(onFulfilled, onRejected) {
-			return new MyPromise((resolve, reject) => {
-				const callback = { resolve, reject, onFulfilled, onRejected }
-				...
-			})
-		}
-	}
+    class MyPromise {
+      ...
+      then(onFulfilled, onRejected) {
+        return new MyPromise((resolve, reject) => {
+          const callback = { resolve, reject, onFulfilled, onRejected }
+          ...
+        })
+      }
+    }
    ```
 3. 修改runCallback方法，添加对then返回Promise的操作
    ```js
