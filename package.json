@@ -4,9 +4,10 @@
 	"description": "",
 	"type": "module",
 	"scripts": {
-		"dev": "esno promise_a_plus_test.js",
-		"test": "esno promise_a_plus_test.spec.ts",
-		"v2": "esno article_promise_v2.js"
+		"dev": "esno myPromise.js",
+		"dev_ts": "esno myPromisePlus.ts",
+		"test": "esno promise_a_plus_test.js",
+		"test_ts": "esno promise_a_plus_test.spec.ts"
 	},
 	"keywords": [],
 	"author": "",
@@ -17,3 +18,4 @@
 		"typescript": "^4.9.5"
 	}
 }
+
