@@ -257,7 +257,7 @@ Promise 是异步编程的一种解决方案，比传统的解决方案——回
    ```
 5. 使用resolvePromise代替onFulfilled处理value信息
    ```js
-   	class MyPromise {
+	class MyPromise {
 		constructor(executor) {
 			...
 			try {
