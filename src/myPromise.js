@@ -103,7 +103,7 @@ class MyPromise {
      * @param {*} callback.onFulfilled 成功状态下回调函数
      * @param {*} callback.onRejected 失败状态下回调函数
      */
-    _runCallback({ onFulfilled, onRejected }) {
+    _runCallback = ({ onFulfilled, onRejected }) => {
         // 成功状态
         if (this.state === FULFILLED) {
             // 若onFulfilled为函数，则传入result作为参数执行
