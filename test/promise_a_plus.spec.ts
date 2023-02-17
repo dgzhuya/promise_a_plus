@@ -1,5 +1,5 @@
 import PromiseAplusTests from 'promises-aplus-tests'
-import MyPromise from '../src/myPromiseSimple.js'
+import MyPromise from '../src/myPromiseTS'
 
 const adapter = {
     resolved(value) {
@@ -13,7 +13,7 @@ const adapter = {
         })
     },
     deferred() {
-        let dfd = {}
+        let dfd: any = {}
         dfd.promise = new MyPromise((resolve, reject) => {
             dfd.resolve = resolve
             dfd.reject = reject
@@ -21,6 +21,6 @@ const adapter = {
         return dfd
     }
 }
-PromiseAplusTests(adapter, err => {
+PromiseAplusTests(adapter, function (err) {
     console.log(err)
 })

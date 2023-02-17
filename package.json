@@ -3,10 +3,13 @@
     "type": "module",
     "scripts": {
         "dev": "node src/myPromise.js",
-        "test": "node test/promise_a_plus.test.js"
+        "test": "node test/promise_a_plus.test.js",
+        "dev_ts": "esno src/myPromiseTS.ts",
+        "test_ts": "esno test/promise_a_plus.spec.ts"
     },
     "devDependencies": {
-        "promises-aplus-tests": "^2.1.2"
+        "esno": "^0.16.3",
+        "promises-aplus-tests": "^2.1.2",
+        "typescript": "^4.9.5"
     }
 }
-
