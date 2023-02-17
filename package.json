@@ -4,10 +4,10 @@
 	"description": "",
 	"type": "module",
 	"scripts": {
-		"dev": "esno myPromise.js",
-		"dev_ts": "esno myPromisePlus.ts",
-		"test": "esno promise_a_plus_test.js",
-		"test_ts": "esno promise_a_plus_test.spec.ts"
+		"dev": "esno src/myPromise.js",
+		"dev_ts": "esno src/myPromisePlus.ts",
+		"test": "esno src/promise_a_plus_test.js",
+		"test_ts": "esno src/promise_a_plus_test.spec.ts"
 	},
 	"keywords": [],
 	"author": "",
