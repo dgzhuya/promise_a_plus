@@ -1,6 +1,6 @@
 import PromiseAplusTests from 'promises-aplus-tests'
 // import MyPromise from './other_promise'
-import MyPromise from './myPromisePlus'
+import MyPromise from '../src/myPromisePlus'
 
 const adapter = {
 	resolved(value) {
