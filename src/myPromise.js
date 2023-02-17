@@ -97,7 +97,7 @@ class MyPromise {
                     }
                 } catch (error) {
                     // 如果抛出异常则调用reject函数
-                    return onFulfilled(error)
+                    return onRejected(error)
                 }
             }
             // 若为其他类型则直接调用resolve函数
