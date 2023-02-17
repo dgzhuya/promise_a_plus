@@ -49,7 +49,7 @@ class MyPromise {
 		const reject = reason => {
 			if (this.state !== PENDING) return
 			// 修改状态为执行失败
-			this.state = FULFILLED
+			this.state = REJECTED
 			// 保存执行失败错误信息
 			this.result = reason
 		}
