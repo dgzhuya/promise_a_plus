@@ -93,7 +93,7 @@ class MyPromise {
                     // 如果then为一个函数
                     if (isFunction(then)) {
                         // 进入一个新的MyPromise对象
-                        return new MyPromise(then.bind(value)).then(onRejected, onRejected)
+                        return new MyPromise(then.bind(value)).then(onFulfilled, onRejected)
                     }
                 } catch (error) {
                     // 如果抛出异常则调用reject函数
