@@ -119,16 +119,18 @@ class MyPromise {
      * @param {*} onRejected FULFILLED状态的回调函数
      */
     then(onFulfilled, onRejected) {
-        // 创建回调信息
-        const callback = { onFulfilled, onRejected }
-        // 当前状态为等待中
-        if (this.state === PENDING) {
-            // 保存回调信息到callbacks数组中
-            this.callbacks.push(callback)
-            return
-        }
-        // 在微任务队列中执行当前任务
-        queueMicrotask(() => this._runCallback(callback))
+        return new MyPromise((resolve, reject) => {
+            // 创建回调信息，将需要返回的Promise执行函数保存至callback之中
+            const callback = { resolve, reject, onFulfilled, onRejected }
+            // 当前状态为等待中
+            if (this.state === PENDING) {
+                // 保存回调信息到callbacks数组中
+                this.callbacks.push(callback)
+                return
+            }
+            // 在微任务队列中执行当前任务
+            queueMicrotask(() => this._runCallback(callback))
+        })
     }
 
     /**
@@ -144,19 +146,28 @@ class MyPromise {
     /**
      * 执行then传入的函数信息
      * @param {object} callback 需要执行的回调函数信息
+     * @param {Function} callback.resolve then函数返回的Promise reject函数
+     * @param {Function} callback.reject then函数返回的Promise reject函数
      * @param {*} callback.onFulfilled 成功状态下回调函数
      * @param {*} callback.onRejected 失败状态下回调函数
      */
-    _runCallback = ({ onFulfilled, onRejected }) => {
-        // 成功状态
-        if (this.state === FULFILLED) {
-            // 若onFulfilled为函数，则传入result作为参数执行
-            isFunction(onFulfilled) && onFulfilled(this.result)
-        }
-        // 失败状态
-        if (this.state === REJECTED) {
-            // 若onRejected为函数，则传入result作为参数执行
-            isFunction(onRejected) && onRejected(this.result)
+    _runCallback = ({ resolve, reject, onFulfilled, onRejected }) => {
+        try {
+            // 成功状态
+            if (this.state === FULFILLED) {
+                // 若onFulfilled为函数，则传入result作为参数执行，并作为resolve参数传递给then返回的Promise之中
+                // 若onFulfilled不为函数，直接传递当前result至返回的Promise resolve之中
+                isFunction(onFulfilled) ? resolve(onFulfilled(this.result)) : resolve(this.result)
+            }
+            // 失败状态
+            if (this.state === REJECTED) {
+                // 若onRejected为函数，则传入result作为参数执行，并作为resolve参数传递给then返回的Promise之中
+                // 若onRejected不为函数，直接传递当前result至返回的Promise reject之中
+                isFunction(onRejected) ? resolve(onRejected(this.result)) : reject(this.result)
+            }
+        } catch (error) {
+            // 若当前函数执行抛出，直接调用返回的Promise reject方法
+            reject(error)
         }
     }
 }
@@ -169,9 +180,11 @@ const p = new MyPromise((resolve, reject) => {
 })
 p.then(
     data => {
-        console.log('data: ', data)
+        return { data }
     },
     err => {
         console.log('err: ', err)
     }
-)
+).then(data => {
+    console.log('data: ', data)
+})
