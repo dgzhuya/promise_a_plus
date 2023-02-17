@@ -42,6 +42,8 @@ class MyPromise {
             this.state = FULFILLED
             // 保存操作成功结果
             this.result = value
+            // 将数组中的函数在微任务队列中运行
+            queueMicrotask(this._runAllCallbacks)
         }
         /**
          * 异步操作失败时调用
@@ -54,10 +56,17 @@ class MyPromise {
             this.state = REJECTED
             // 保存执行失败错误信息
             this.result = reason
+            // 将数组中的函数在微任务队列中运行
+            queueMicrotask(this._runAllCallbacks)
         }
 
-        // 执行外部传入参数
-        executor(reslove, reject)
+        try {
+            // 执行外部传入参数
+            executor(reslove, reject)
+        } catch (error) {
+            // 若executor抛出异常则调用reject函数
+            reject(error)
+        }
     }
 
     /**
@@ -74,8 +83,18 @@ class MyPromise {
             this.callbacks.push(callback)
             return
         }
-        // 执行当前任务
-        this._runCallback(callback)
+        // 在微任务队列中执行当前任务
+        queueMicrotask(() => this._runCallback(callback))
+    }
+
+    /**
+     * 执行callbacks数组中保存的
+     */
+    _runAllCallbacks = () => {
+        // 循环调用数组元素执行
+        this.callbacks.forEach(this._runCallback)
+        // 完成后清空数组
+        this.callbacks = []
     }
 
     /**
@@ -99,7 +118,9 @@ class MyPromise {
 }
 
 const p = new MyPromise((resolve, reject) => {
-    Math.floor(Math.random() * 10) > 4 ? resolve('success') : reject('fail')
+    setTimeout(() => {
+        Math.floor(Math.random() * 10) > 4 ? resolve('success') : reject('fail')
+    }, 111)
 })
 p.then(
     data => {
@@ -109,3 +130,4 @@ p.then(
         console.log('err: ', err)
     }
 )
+console.log(1111)
