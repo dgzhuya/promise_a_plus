@@ -54,7 +54,7 @@ class MyPromise {
             // 修改状态为执行成功
             this.state = state
             // 保存操作成功结果
-            this.result = value
+            this.result = result
             // 将数组中的函数在微任务队列中运行
             queueMicrotask(this._runAllCallbacks)
         }
@@ -93,7 +93,7 @@ class MyPromise {
                     // 如果then为一个函数
                     if (isFunction(then)) {
                         // 进入一个新的MyPromise对象
-                        return new MyPromise(then.bind(value)).then(resolve, onRejected)
+                        return new MyPromise(then.bind(value)).then(onRejected, onRejected)
                     }
                 } catch (error) {
                     // 如果抛出异常则调用reject函数
@@ -106,10 +106,10 @@ class MyPromise {
 
         try {
             // 执行外部传入参数
-            executor(executedHandler(resolvePromise), executedHandler(reject))
+            executor(executedHandler(resolvePromise), executedHandler(onRejected))
         } catch (error) {
             // 若executor抛出异常则调用reject函数
-            executedHandler(reject)(error)
+            executedHandler(onRejected)(error)
         }
     }
 
