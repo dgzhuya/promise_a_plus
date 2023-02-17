@@ -29,43 +29,87 @@ class MyPromise {
         this.state = PENDING
         // 用于记录then函数的参数信息
         this.callbacks = []
+        // 用于记录constructor的参数执行状态
+        let isExecuted = false
+
+        /**
+         * 用于限制函数执行次数
+         * @param {Function} fn 需要限制的函数
+         * @returns 若isExecuted为true则函数不会执行
+         */
+        const executedHandler = fn => result => {
+            if (isExecuted) return
+            isExecuted = true
+            isFunction(fn) && fn(result)
+        }
+
+        /**
+         * 通过传递状态生成onFulfilled或者onRejected函数
+         * @param {*} state 需要生成的函数其状态
+         * @returns onFulfilled | onRejected
+         */
+        const resultHandler = state => result => {
+            // 若当前状态已经被修改则不可修改状态
+            if (this.state !== PENDING) return
+            // 修改状态为执行成功
+            this.state = state
+            // 保存操作成功结果
+            this.result = value
+            // 将数组中的函数在微任务队列中运行
+            queueMicrotask(this._runAllCallbacks)
+        }
 
         /**
          * 异步操作成功时调用
          * @param {*} value 操作成功结果
          * @returns void
          */
-        const reslove = value => {
-            // 若当前状态已经被修改则不可修改状态
-            if (this.state !== PENDING) return
-            // 修改状态为执行成功
-            this.state = FULFILLED
-            // 保存操作成功结果
-            this.result = value
-            // 将数组中的函数在微任务队列中运行
-            queueMicrotask(this._runAllCallbacks)
-        }
+        const onFulfilled = resultHandler(FULFILLED)
         /**
          * 异步操作失败时调用
          * @param {*} reason 错误信息
          * @returns void
          */
-        const reject = reason => {
-            if (this.state !== PENDING) return
-            // 修改状态为执行失败
-            this.state = REJECTED
-            // 保存执行失败错误信息
-            this.result = reason
-            // 将数组中的函数在微任务队列中运行
-            queueMicrotask(this._runAllCallbacks)
+        const onRejected = resultHandler(REJECTED)
+
+        /**
+         * 处理resolve传入参数信息
+         * @param {*} value resolve传入参数
+         */
+        const resolvePromise = value => {
+            // 传入value为当前对象时，抛出异常
+            if (value === this) {
+                return onRejected(new TypeError('Chaining cycle detected for promise'))
+            }
+            // 当前value为MyPromise则执行函数
+            if (value instanceof MyPromise) {
+                return value.then(onFulfilled, onRejected)
+            }
+            // 当value值为对象的时候
+            if (isObject(value) || isFunction(value)) {
+                try {
+                    // 如果value包含一个then字段
+                    const then = value.then
+                    // 如果then为一个函数
+                    if (isFunction(then)) {
+                        // 进入一个新的MyPromise对象
+                        return new MyPromise(then.bind(value)).then(resolve, onRejected)
+                    }
+                } catch (error) {
+                    // 如果抛出异常则调用reject函数
+                    return onFulfilled(error)
+                }
+            }
+            // 若为其他类型则直接调用resolve函数
+            onFulfilled(value)
         }
 
         try {
             // 执行外部传入参数
-            executor(reslove, reject)
+            executor(executedHandler(resolvePromise), executedHandler(reject))
         } catch (error) {
             // 若executor抛出异常则调用reject函数
-            reject(error)
+            executedHandler(reject)(error)
         }
     }
 
@@ -103,7 +147,7 @@ class MyPromise {
      * @param {*} callback.onFulfilled 成功状态下回调函数
      * @param {*} callback.onRejected 失败状态下回调函数
      */
-    _runCallback({ onFulfilled, onRejected }) {
+    _runCallback = ({ onFulfilled, onRejected }) => {
         // 成功状态
         if (this.state === FULFILLED) {
             // 若onFulfilled为函数，则传入result作为参数执行
@@ -118,9 +162,10 @@ class MyPromise {
 }
 
 const p = new MyPromise((resolve, reject) => {
-    setTimeout(() => {
-        Math.floor(Math.random() * 10) > 4 ? resolve('success') : reject('fail')
-    }, 111)
+    resolve({
+        then: resolve => resolve('aaa')
+    })
+    resolve('bbb')
 })
 p.then(
     data => {
@@ -130,4 +175,3 @@ p.then(
         console.log('err: ', err)
     }
 )
-console.log(1111)
