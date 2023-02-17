@@ -1,8 +1,12 @@
 {
-	"name": "my_promise",
-	"type": "module",
-	"scripts": {
-		"dev": "node src/myPromise.js"
-	}
+    "name": "my_promise",
+    "type": "module",
+    "scripts": {
+        "dev": "node src/myPromise.js",
+        "test": "node test/promise_a_plus.test.js"
+    },
+    "devDependencies": {
+        "promises-aplus-tests": "^2.1.2"
+    }
 }
 

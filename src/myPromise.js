@@ -17,7 +17,7 @@ const isFunction = value => typeof value === 'function'
  */
 const isObject = value => Object.prototype.toString.call(value) === '[object Object]'
 
-class MyPromise {
+export default class MyPromise {
     /**
      * 初始化函数
      * @param { Function } executor 执行函数
@@ -171,20 +171,3 @@ class MyPromise {
         }
     }
 }
-
-const p = new MyPromise((resolve, reject) => {
-    resolve({
-        then: resolve => resolve('aaa')
-    })
-    resolve('bbb')
-})
-p.then(
-    data => {
-        return { data }
-    },
-    err => {
-        console.log('err: ', err)
-    }
-).then(data => {
-    console.log('data: ', data)
-})
