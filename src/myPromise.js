@@ -27,6 +27,8 @@ class MyPromise {
 		this.result = null
 		// 记录当前Promise状态
 		this.state = PENDING
+		// 用于记录then函数的参数信息
+		this.callbacks = []
 
 		/**
 		 * 异步操作成功时调用
@@ -57,9 +59,53 @@ class MyPromise {
 		// 执行外部传入参数
 		executor(reslove, reject)
 	}
+
+	/**
+	 * 添加状态改变时的回调函数
+	 * @param {*} onFulfilled FULFILLED状态回调函数
+	 * @param {*} onRejected FULFILLED状态的回调函数
+	 */
+	then(onFulfilled, onRejected) {
+		// 创建回调信息
+		const callback = { onFulfilled, onRejected }
+		// 当前状态为等待中
+		if (this.state === PENDING) {
+			// 保存回调信息到callbacks数组中
+			this.callbacks.push(callback)
+			return
+		}
+		// 执行当前任务
+		this._runCallback(callback)
+	}
+
+	/**
+	 * 执行then传入的函数信息
+	 * @param {object} callback 需要执行的回调函数信息
+	 * @param {*} callback.onFulfilled 成功状态下回调函数
+	 * @param {*} callback.onRejected 失败状态下回调函数
+	 */
+	_runCallback({ onFulfilled, onRejected }) {
+		// 成功状态
+		if (this.state === FULFILLED) {
+			// 若onFulfilled为函数，则传入result作为参数执行
+			isFunction(onFulfilled) && onFulfilled(this.result)
+		}
+		// 失败状态
+		if (this.state === REJECTED) {
+			// 若onRejected为函数，则传入result作为参数执行
+			isFunction(onRejected) && onRejected(this.result)
+		}
+	}
 }
 
 const p = new MyPromise((resolve, reject) => {
 	Math.floor(Math.random() * 10) > 4 ? resolve('success') : reject('fail')
 })
-console.log('MyPromise: ', p)
+p.then(
+	data => {
+		console.log('data: ', data)
+	},
+	err => {
+		console.log('err: ', err)
+	}
+)
