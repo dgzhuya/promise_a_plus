@@ -1,85 +1,65 @@
+// 等待
 const PENDING = 'pending'
+// 成功
 const FULFILLED = 'fulfilled'
+// 失败
 const REJECTED = 'rejected'
+/**
+ * 传入值否为函数
+ * @param {*} value 传入value
+ * @returns boolean
+ */
 const isFunction = value => typeof value === 'function'
+/**
+ * 传入值类型是否为对象
+ * @param {*} value 传入值
+ * @returns boolean
+ */
 const isObject = value => Object.prototype.toString.call(value) === '[object Object]'
 
-export default class MyPromise {
+class MyPromise {
+	/**
+	 * 初始化函数
+	 * @param { Function } executor 执行函数
+	 */
 	constructor(executor) {
+		// 保存异步操作执行结果
 		this.result = null
+		// 记录当前Promise状态
 		this.state = PENDING
-		this.callbacks = []
-		let isExecuted = false
 
-		const executeHandler = fn => result => {
-			if (isExecuted) return
-			isExecuted = true
-			isFunction(fn) && fn(result)
-		}
-
-		const resultHandler = state => result => {
+		/**
+		 * 异步操作成功时调用
+		 * @param {*} value 操作成功结果
+		 * @returns void
+		 */
+		const reslove = value => {
+			// 若当前状态已经被修改则不可修改状态
 			if (this.state !== PENDING) return
-			this.state = state
-			this.result = result
-			queueMicrotask(this._runAllCallbacks)
+			// 修改状态为执行成功
+			this.state = FULFILLED
+			// 保存操作成功结果
+			this.result = value
+		}
+		/**
+		 * 异步操作失败时调用
+		 * @param {*} reason 错误信息
+		 * @returns void
+		 */
+		const reject = reason => {
+			if (this.state !== PENDING) return
+			// 修改状态为执行失败
+			this.state = FULFILLED
+			// 保存执行失败错误信息
+			this.result = reason
 		}
 
-		const onFulfilled = resultHandler(FULFILLED)
-		const onRejected = resultHandler(REJECTED)
-
-		const resolvePromise = value => {
-			if (value === this) {
-				return onRejected(new TypeError('Chaining cycle detected for promise'))
-			}
-			if (value instanceof MyPromise) {
-				return value.then(onFulfilled, onRejected)
-			}
-			if (isObject(value) || isFunction(value)) {
-				try {
-					const then = value.then
-					if (typeof then === 'function') {
-						return new MyPromise(then.bind(value)).then(onFulfilled, onRejected)
-					}
-				} catch (error) {
-					return onRejected(error)
-				}
-			}
-			onFulfilled(value)
-		}
-
-		try {
-			executor(executeHandler(resolvePromise), executeHandler(onRejected))
-		} catch (error) {
-			executeHandler(onRejected)(error)
-		}
-	}
-
-	then(onFulfilled, onRejected) {
-		return new MyPromise((resolve, reject) => {
-			const callback = { resolve, reject, onFulfilled, onRejected }
-			if (this.state === PENDING) {
-				this.callbacks.push(callback)
-				return
-			}
-			queueMicrotask(() => this._runCallback(callback))
-		})
-	}
-
-	_runAllCallbacks = () => {
-		this.callbacks.forEach(this._runCallback)
-		this.callbacks = []
-	}
-
-	_runCallback = ({ resolve, reject, onFulfilled, onRejected }) => {
-		try {
-			if (this.state === FULFILLED) {
-				isFunction(onFulfilled) ? resolve(onFulfilled(this.result)) : resolve(this.result)
-			}
-			if (this.state === REJECTED) {
-				isFunction(onRejected) ? resolve(onRejected(this.result)) : reject(this.result)
-			}
-		} catch (error) {
-			reject(error)
-		}
+		// 执行外部传入参数
+		executor(reslove, reject)
 	}
 }
+
+const p = new MyPromise((resolve, reject) => {
+	Math.floor(Math.random() * 10) > 4 ? resolve('success') : reject('fail')
+})
+console.log('MyPromise: ', p)
