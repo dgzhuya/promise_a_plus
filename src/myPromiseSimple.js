@@ -68,7 +68,6 @@ export default class MyPromise {
 
     _runAllCallbacks = () => {
         this.callbacks.forEach(this._runCallback)
-        this.callbacks = []
     }
 
     _runCallback = ({ resolve, reject, onFulfilled, onRejected }) => {
